@@ -318,7 +318,7 @@
     #char-panel table th:nth-child(4), #char-panel table td:nth-child(4) { width: 10%; }
     #char-panel table th:nth-child(5), #char-panel table td:nth-child(5) { width: 10%; }
     #char-panel table th:nth-child(6), #char-panel table td:nth-child(6) { width: 10%; }
-    #char-panel table th:nth-child(7), #char-panel table td:nth-child(7) { width: 12%; }
+    #char-panel table th:nth-child(7), #char-panel table td:nth-child(7) { width: 10%; }
     #char-panel table th:nth-child(8), #char-panel table td:nth-child(8) { width: 16%; }
     .total-row td {
       border-top: 2px solid var(--border);
@@ -1370,6 +1370,7 @@
     // Recompute and update only derived UI (no full re-render) to preserve focus
     function updateDerived() {
       const compute = computeCarryAndCosts(state);
+      const activeRoster = getActiveRoster(state);
       const activeIdx = ui.activeCharIndex;
       const perChar = compute.perCharacter[activeIdx];
       const panel = document.getElementById("char-panel");
@@ -1409,7 +1410,12 @@
         }
         const charTotal = document.getElementById("char-total-value");
         if (charTotal) {
-          charTotal.textContent = `${formatNumber(perChar.totals.marketValue)} gold`;
+          const chNow = activeRoster.characters[activeIdx] || {};
+          const charBoundNow = Number(chNow.boundGold) || 0;
+          const charReqNow = Number(chNow.requiredGold) || 0;
+          const charGoldNeedNow = Math.max(0, charReqNow - charBoundNow);
+          const totalNow = (perChar.totals.marketValue || 0) + charGoldNeedNow;
+          charTotal.textContent = `${formatNumber(totalNow)} gold`;
         }
       }
       // Update grand totals panel without touching other inputs
