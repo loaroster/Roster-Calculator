@@ -307,6 +307,10 @@
     /* Avoid header/column displacement in some browsers (e.g., Opera) */
     .totals table { table-layout: fixed; }
     .totals table thead th { position: static; top: auto; }
+    /* Apply the same stabilization to the roster materials table */
+    #char-panel table { table-layout: fixed; }
+    #char-panel table thead th { position: static; top: auto; }
+    #char-panel table td, #char-panel table th { overflow: hidden; text-overflow: ellipsis; }
     .total-row td {
       border-top: 2px solid var(--border);
       font-weight: 700;
