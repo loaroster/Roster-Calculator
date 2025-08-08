@@ -304,6 +304,9 @@
       border-left: 1px solid var(--border);
       padding-left: 12px;
     }
+    /* Avoid header/column displacement in some browsers (e.g., Opera) */
+    .totals table { table-layout: fixed; }
+    .totals table thead th { position: static; top: auto; }
     .total-row td {
       border-top: 2px solid var(--border);
       font-weight: 700;
