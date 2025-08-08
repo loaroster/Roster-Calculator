@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Lost Ark Roster Materials Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    :root {
+      /* Dark theme (default) */
+      --bg: #0f1320;
+      --panel: #171c2c;
+      --panel-2: #1e2436;
+      --muted: #9aa4bf;
+      --text: #e6e9f2;
+      --accent: #6ea8fe;
+      --danger: #ff6b6b;
+      --success: #2ecc71;
+      --warning: #f1c40f;
+      --border: #2a3351;
+      --input-bg: #101426;
+      --body-bg: linear-gradient(180deg, #0a0e1a, #0b1020 40%, #0f1320 100%);
+      --sticky-bg: rgba(15,19,32,0.7);
+      --thead-bg: #101426;
+      --thead-text: #c7d0ec;
+      --table-bg: #111628;
+      --btn-bg: #121833;
+      --btn-bg-hover: #0f1733;
+      --tab-bg: var(--thead-bg);
+      --tab-active-bg: #1b2a52;
+      --tab-active-border: #2f4fa0;
+      /* Warning button theme (dark) */
+      --btn-warning-bg: rgba(241,196,15,0.18);
+      --btn-warning-border: rgba(241,196,15,0.45);
+      --btn-warning-fg: #f7e6a5;
+      /* Carry pill (blue) */
+      --pill-blue-bg: rgba(110,168,254,0.25);
+      --pill-blue-fg: #e2eeff;
+      --pill-blue-border: rgba(110,168,254,0.35);
+      --pill-green-bg: rgba(46,204,113,0.15);
+      --pill-green-fg: #9ef0bd;
+      --pill-green-border: rgba(46,204,113,0.25);
+      --pill-red-bg: rgba(255,107,107,0.15);
+      --pill-red-fg: #ffd6d6;
+      --pill-red-border: rgba(255,107,107,0.25);
+    }
+    :root[data-theme="light"] {
+      --bg: #f7f9fc;
+      --panel: #ffffff;
+      --panel-2: #f6f8ff;
+      --muted: #5f6b86;
+      --text: #0f1320;
+      --accent: #2f5ac7;
+      --danger: #c0392b;
+      --success: #1e8e3e;
+      --warning: #b8860b;
+      --border: #e3e8f0;
+      --input-bg: #ffffff;
+      --body-bg: linear-gradient(180deg, #f9fbff, #f0f4ff 40%, #e9eefb 100%);
+      --sticky-bg: rgba(255,255,255,0.85);
+      --thead-bg: #f3f5fb;
+      --thead-text: #3a4260;
+      --table-bg: #ffffff;
+      --btn-bg: #eef2fb;
+      --btn-bg-hover: #e3e9f8;
+      --tab-bg: var(--thead-bg);
+      --tab-active-bg: #e0e8ff;
+      --tab-active-border: #bcd0ff;
+      /* Warning button theme (light) */
+      --btn-warning-bg: #fff7db;
+      --btn-warning-border: #e5cb7a;
+      --btn-warning-fg: #6a4e00;
+      /* Carry pill (blue) */
+      --pill-blue-bg: #cfe2ff;
+      --pill-blue-fg: #1b3f7a;
+      --pill-blue-border: #8fb7ff;
+      --pill-green-bg: #c8efdb;
+      --pill-green-fg: #0f5a2f;
+      --pill-green-border: #6dd3a0;
+      --pill-red-bg: #ffd0d0;
+      --pill-red-fg: #7a1f1f;
+      --pill-red-border: #f09a9a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--body-bg);
+      color: var(--text);
+    }
+    header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--sticky-bg);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    header .sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .container {
+      display: grid;
+      gap: 16px;
+      padding: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 1100px) {
+      .grid {
+        grid-template-columns: 1.2fr 2fr;
+        align-items: start;
+      }
+    }
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .card-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .card-header-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    /* Fix for other card headers that don't use card-header class */
+    .card > h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .muted { color: var(--muted); font-size: 12px; }
+    .btn {
+      padding: 8px 12px;
+      background: var(--btn-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.15s ease;
+      font-weight: 600;
+      font-size: 12px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .btn:hover { background: var(--btn-bg-hover); }
+    .btn.primary { background: #193769; border-color: #2a559f; color: white; }
+    .btn.primary:hover { background: #1b3f7a; }
+    .btn.danger { background: #4a1e26; border-color: #6d2a36; color: #ffd6da; }
+    .btn.warning { background: var(--btn-warning-bg); border-color: var(--btn-warning-border); color: var(--btn-warning-fg); }
+    .btn.warning:hover { filter: brightness(1.05); }
+    .btn.small { padding: 6px 8px; font-size: 12px; }
+    .btn.icon {
+      width: 28px; height: 28px; padding: 0;
+      display: inline-grid; place-items: center; font-size: 16px;
+    }
+    /* Header action button sizing */
+    .card-header-buttons .btn.small { height: 32px; min-height: 32px; padding-top: 0; padding-bottom: 0; line-height: 1; display: inline-flex; align-items: center; white-space: nowrap; overflow: hidden; }
+
+    /* Apply identical height to all header action buttons regardless of ID */
+    .card-header-buttons .btn.small {
+      height: 32px;
+      min-height: 32px;
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .field {
+      display: grid; gap: 6px;
+    }
+    .field label {
+      font-size: 12px; color: var(--muted);
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: 0.15s ease;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { margin: 0; }
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: #3c4e84;
+      box-shadow: 0 0 0 2px rgba(86,128,233,0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--table-bg);
+    }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      vertical-align: middle;
+    }
+    thead th {
+      background: var(--thead-bg);
+      color: var(--thead-text);
+      position: sticky; top: 57px; z-index: 5;
+    }
+    tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    .tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .tab {
+      padding: 8px 10px; border: 1px solid var(--border);
+      background: var(--tab-bg); color: var(--text);
+      border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    .tab.active { background: var(--tab-active-bg); border-color: var(--tab-active-border); }
+    .tab.editing { cursor: text; }
+    .tab .rename-input {
+      background: var(--tab-bg);
+      color: var(--text);
+      border: 1px solid var(--tab-active-border);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 10px;
+      outline: none;
+    }
+    .pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+    }
+    .pill.green { background: var(--pill-green-bg); color: var(--pill-green-fg); border: 1px solid var(--pill-green-border); }
+    .pill.red { background: var(--pill-red-bg); color: var(--pill-red-fg); border: 1px solid var(--pill-red-border); }
+    .pill.blue { background: var(--pill-blue-bg); color: var(--pill-blue-fg); border: 1px solid var(--pill-blue-border); }
+    .right { text-align: right; }
+    .note {
+      background: var(--panel-2); border: 1px dashed var(--border); padding: 10px; border-radius: 10px;
+      color: var(--muted); font-size: 12px;
+    }
+    .section-footer {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .hr { height: 1px; background: var(--border); margin: 12px 0; }
+    /* Ensure the first divider in totals sections can be aligned exactly via padding */
+    #grand-table .hr:first-child, #filtered-table .hr:first-child { margin-top: 0; }
+    .price-header {
+      display: grid;
+      grid-template-columns: 1fr 120px 40px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .price-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 40px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .totals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 700px) {
+      .totals { grid-template-columns: 1fr; }
+    }
+    .totals-right {
+      border-left: 1px solid var(--border);
+      padding-left: 12px;
+    }
+    .total-row td {
+      border-top: 2px solid var(--border);
+      font-weight: 700;
+    }
+    .total-row td:first-child {
+      text-align: left;
+      padding-left: 8px;
+    }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: #0a1023; border: 1px solid #27305a; padding: 1px 6px; border-radius: 4px; font-size: 11px;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+    .theme-toggle .icon { font-size: 14px; opacity: 0.9; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--panel-2); border: 1px solid var(--border); transition: .2s; border-radius: 999px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; top: 50%; transform: translateY(-50%);
+      background-color: var(--text); border-radius: 50%; transition: .2s;
+    }
+    input:checked + .slider { background: #bcd0ff; }
+    input:checked + .slider:before { transform: translate(20px, -50%); background: #1a2b55; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="theme-toggle" title="Toggle theme">
+      <span class="icon">🌙</span>
+      <label class="switch">
+        <input type="checkbox" id="themeCheckbox" aria-label="Toggle light/dark theme"/>
+        <span class="slider"></span>
+      </label>
+      <span class="icon">☀️</span>
+    </div>
+    <h1>Lost Ark Roster Materials Calculator</h1>
+    <div class="sub">
+      Bound-first consumption, only carries over Unbound/Other to the next character
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <div class="card" id="price-card">
+        <h2>Price Table</h2>
+        <div class="muted">Add materials and set price per unit. Prices are used to value remaining needs.</div>
+        <div class="hr"></div>
+        <div class="price-header">
+          <div>Material</div>
+          <div class="right">Price (gold)</div>
+          <div></div>
+        </div>
+        <div id="price-list"></div>
+        <div class="row">
+          <button class="btn primary" id="add-material">Add Material</button>
+          <div class="muted">Tip: You can rename materials anytime; data stays linked.</div>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <button class="btn" id="export-json">Export JSON</button>
+          <button class="btn" id="import-json">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json" style="display:none"/>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Roster</h2>
+          <div class="card-header-buttons">
+            <button class="btn small warning" id="add-roster" title="Create a new roster">New Roster</button>
+            <button class="btn small danger" id="remove-roster" title="Delete current roster">Remove Roster</button>
+          </div>
+        </div>
+        <div class="row" id="roster-switcher" style="justify-content: space-between; align-items: center; margin-bottom:8px;">
+          <div class="tabs" id="roster-tabs"></div>
+        </div>
+        <div class="tabs" id="char-tabs"></div>
+        <div id="char-panel"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Totals</h2>
+      <div class="totals">
+        <div>
+          <div class="row" style="gap: 12px; margin-bottom: 12px;">
+            <div class="field" style="flex: 1;">
+              <label for="rawGold">Raw Gold Available</label>
+              <input type="number" id="rawGold" min="0" step="1" placeholder="0"/>
+            </div>
+            <div class="field" style="flex: 1;">
+              <label for="rawGoldRemaining">Raw Gold Remaining</label>
+              <input type="text" id="rawGoldRemaining" readonly placeholder="0"/>
+            </div>
+          </div>
+          <div id="grand-table"></div>
+        </div>
+        <div class="totals-right">
+          <div class="muted" style="margin-bottom:12px;">Filter by Character</div>
+          <div id="char-filters" class="row" style="margin-bottom:19px; flex-wrap: wrap;"></div>
+          <div id="filtered-table"></div>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="note">
+        Data persists to your browser’s localStorage. To move devices/browsers, use Export/Import.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const THEME_STORAGE_KEY = "lar_theme_v1";
+    const STORAGE_KEY = "lar_state_v1";
+
+    function generateId() {
+      // Simple unique id for materials
+      return "m_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+    }
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function createDefaultState() {
+      const rosterSize = 6;
+      return {
+        materials: [],
+        rosters: [
+          {
+            name: 'Roster 1',
+            rosterSize,
+            characters: Array.from({ length: rosterSize }, (_, i) => ({ name: `Character ${i + 1}`, materials: {}, requiredGold: 0, boundGold: 0 })),
+            rawGold: 0
+          }
+        ],
+        activeRosterIndex: 0
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createDefaultState();
+        const parsed = JSON.parse(raw);
+
+        // Migrate old shape {materials, rosterSize, characters, rawGold} -> new rosters[]
+        if (!Array.isArray(parsed.materials)) parsed.materials = [];
+        if (!Array.isArray(parsed.rosters)) {
+          let rosterSize = Number(parsed.rosterSize);
+          if (!Number.isInteger(rosterSize) || rosterSize < 1) rosterSize = 6;
+          let characters = Array.isArray(parsed.characters) ? parsed.characters : Array.from({ length: rosterSize }, () => ({ materials: {} }));
+          if (characters.length !== rosterSize) {
+            characters = Array.from({ length: rosterSize }, (_, i) => characters[i] || { materials: {} });
+          }
+          const rawGold = typeof parsed.rawGold === 'number' ? parsed.rawGold : 0;
+          const roster = { name: 'Roster 1', rosterSize, characters, rawGold };
+          parsed.rosters = [ roster ];
+          parsed.activeRosterIndex = 0;
+          delete parsed.rosterSize;
+          delete parsed.characters;
+          delete parsed.rawGold;
+        }
+
+        // Defensive upgrades across versions for each roster
+        parsed.rosters = parsed.rosters.map((r, rIdx) => {
+          let rosterSize = Number(r.rosterSize);
+          if (!Number.isInteger(rosterSize) || rosterSize < 1) rosterSize = 6;
+          let characters = Array.isArray(r.characters) ? r.characters : Array.from({ length: rosterSize }, () => ({ materials: {} }));
+          if (characters.length !== rosterSize) {
+            characters = Array.from({ length: rosterSize }, (_, i) => characters[i] || { materials: {} });
+          }
+          for (const ch of characters) {
+            if (!ch.materials || typeof ch.materials !== 'object') ch.materials = {};
+            if (typeof ch.requiredGold !== 'number') ch.requiredGold = 0;
+            if (typeof ch.boundGold !== 'number') ch.boundGold = 0;
+            if (typeof ch.name !== 'string' || !ch.name) ch.name = `Character ${characters.indexOf(ch) + 1}`;
+            for (const m of parsed.materials) {
+              if (!ch.materials[m.id]) {
+                ch.materials[m.id] = { required: 0, bound: 0, unbound: 0, other: 0 };
+              }
+            }
+          }
+          return { name: r.name || `Roster ${rIdx + 1}`, rosterSize, characters, rawGold: typeof r.rawGold === 'number' ? r.rawGold : 0 };
+        });
+
+        if (!Number.isInteger(parsed.activeRosterIndex) || parsed.activeRosterIndex < 0 || parsed.activeRosterIndex >= parsed.rosters.length) {
+          parsed.activeRosterIndex = 0;
+        }
+
+        return parsed;
+      } catch {
+        return createDefaultState();
+      }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    let state = loadState();
+    let ui = {
+      activeCharIndex: 0,
+      filterSelectedByRoster: {},
+    };
+
+    // Computation: carryover with bound-first consumption
+    function getActiveRoster(currentState) {
+      return currentState.rosters[currentState.activeRosterIndex] || currentState.rosters[0];
+    }
+
+    function computeCarryAndCosts(currentState, filterIndices = null) {
+      const activeRoster = getActiveRoster(currentState);
+      const result = {
+        perCharacter: [], // [{ perMaterial: {id: {...}}, totals: {...} }]
+        grand: {
+          perMaterialRemainingUnits: {}, // id -> units
+          perMaterialMarketValue: {},    // id -> gold
+          perMaterialRequiredUnits: {},  // id -> total required across roster
+          totalMarketValue: 0
+        },
+        carryInByChar: [] // index -> { id: {unbound, other} }
+      };
+
+      const materialIds = currentState.materials.map(m => m.id);
+      // Build quick lookup for price and stack size per material
+      const idToInfo = {};
+      for (const m of currentState.materials) {
+        idToInfo[m.id] = { price: Number(m.price) || 0, stack: getStackSize(m.name || "") };
+      }
+
+      // Initialize carry-in for char 0 as zero
+      let carryIn = {};
+      for (const id of materialIds) {
+        carryIn[id] = { unbound: 0, other: 0 };
+      }
+
+      for (let c = 0; c < activeRoster.rosterSize; c++) {
+        // Record carry-in snapshot for this character (for UI display)
+        const carrySnapshot = {};
+        for (const id of materialIds) {
+          carrySnapshot[id] = { unbound: carryIn[id]?.unbound || 0, other: carryIn[id]?.other || 0 };
+        }
+        result.carryInByChar[c] = carrySnapshot;
+
+        const ch = activeRoster.characters[c] || { materials: {} };
+        const perMaterial = {};
+        let charMarketValue = 0;
+
+        // Compute per material
+        let carryOut = {};
+        for (const id of materialIds) {
+          const { price, stack } = idToInfo[id] || { price: 0, stack: 1 };
+          const entry = ch.materials[id] || { required: 0, bound: 0, unbound: 0, other: 0 };
+
+          const required = Number(entry.required) || 0;
+          const bound = Math.max(0, Number(entry.bound) || 0);
+
+          const availableUnboundTotal = Math.max(0, Number(entry.unbound) || 0) + (carryIn[id]?.unbound || 0);
+          // For characters after the first, ignore direct 'other' input; only carry-in counts
+          const directOther = c === 0 ? Math.max(0, Number(entry.other) || 0) : 0;
+          const availableOtherTotal = directOther + (carryIn[id]?.other || 0);
+
+          // Consume in order: Bound -> Unbound -> Other
+          let remainingNeed = required;
+
+          const usedBound = Math.min(remainingNeed, bound);
+          remainingNeed -= usedBound;
+
+          const usedUnbound = Math.min(remainingNeed, availableUnboundTotal);
+          remainingNeed -= usedUnbound;
+
+          const usedOther = Math.min(remainingNeed, availableOtherTotal);
+          remainingNeed -= usedOther;
+
+          // Leftovers after consumption
+          const leftoverBound = bound - usedBound; // stays on this char, not carried
+          const leftoverUnbound = availableUnboundTotal - usedUnbound;
+          const leftoverOther = availableOtherTotal - usedOther;
+
+          const remainingUnits = Math.max(0, remainingNeed); // what's still needed
+          // Apply stack size for price-based valuation
+          const normalizedUnitPrice = stack > 0 ? (price / stack) : price;
+          const marketValue = remainingUnits * normalizedUnitPrice;
+
+          charMarketValue += marketValue;
+
+          // Prepare next carry
+          carryOut[id] = { unbound: leftoverUnbound, other: leftoverOther };
+
+          // Aggregate grand totals (respect optional filter)
+          const includeThisChar = !filterIndices || filterIndices.has(c);
+          if (includeThisChar) {
+            result.grand.perMaterialRequiredUnits[id] = (result.grand.perMaterialRequiredUnits[id] || 0) + required;
+            result.grand.perMaterialRemainingUnits[id] = (result.grand.perMaterialRemainingUnits[id] || 0) + remainingUnits;
+            result.grand.perMaterialMarketValue[id] = (result.grand.perMaterialMarketValue[id] || 0) + marketValue;
+          }
+
+          perMaterial[id] = {
+            required,
+            usedBound, usedUnbound, usedOther,
+            leftoverBound, leftoverUnbound, leftoverOther,
+            remainingUnits,
+            marketValue
+          };
+        }
+
+        result.perCharacter.push({
+          perMaterial,
+          totals: {
+            marketValue: charMarketValue
+          }
+        });
+
+        // Next character's carry-in
+        carryIn = carryOut;
+      }
+
+      // Total market value across roster
+      result.grand.totalMarketValue = Object.values(result.grand.perMaterialMarketValue).reduce((a,b) => a + b, 0);
+      return result;
+    }
+
+    // Determine market stack size by material name
+    function getStackSize(name) {
+      const n = String(name).toLowerCase();
+      // Guardian/Destruction stones sold in 100s; Destiny shards in 1000s
+      if (n.includes('guardian') && n.includes('stone')) return 100;
+      if (n.includes('destruction') && n.includes('stone')) return 100;
+      if (n.includes('destiny') && n.includes('shard')) return 1000;
+      return 1;
+    }
+
+    // UI helpers
+    function formatNumber(n) {
+      const value = Number(n) || 0;
+      if (Math.abs(value) >= 1000000) return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+      return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+
+    function parseNumberString(str) {
+      if (typeof str !== "string") return Number(str) || 0;
+      const cleaned = str.replace(/,/g, "").trim();
+      const num = Number(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function formatFixed2(n) {
+      const value = Number(n) || 0;
+      return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderPriceTable() {
+      const wrap = document.getElementById("price-list");
+      wrap.innerHTML = "";
+
+      for (const m of state.materials) {
+        const row = document.createElement("div");
+        row.className = "price-row";
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = m.name;
+        nameInput.placeholder = "Material name";
+        // Update on change (blur/enter) to avoid re-rendering while typing
+        nameInput.addEventListener("change", () => {
+          m.name = nameInput.value.trim();
+          saveState(state);
+          renderAll();
+        });
+
+        const priceInput = document.createElement("input");
+        priceInput.type = "number";
+        priceInput.step = "0.01";
+        priceInput.min = "0";
+        priceInput.value = m.price ?? 0;
+        priceInput.addEventListener("input", () => {
+          m.price = Number(priceInput.value) || 0;
+          saveState(state);
+          updateDerived();
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn icon";
+        delBtn.title = "Remove material";
+        delBtn.textContent = "✕";
+        delBtn.addEventListener("click", () => {
+          // Remove material and its per-char entries
+          const idx = state.materials.findIndex(x => x.id === m.id);
+          if (idx >= 0) {
+            state.materials.splice(idx, 1);
+            for (const ch of state.characters) {
+              delete ch.materials[m.id];
+            }
+            saveState(state);
+            renderAll();
+          }
+        });
+
+        row.appendChild(nameInput);
+        row.appendChild(priceInput);
+        row.appendChild(delBtn);
+        wrap.appendChild(row);
+      }
+    }
+
+    function ensureCharMaterials(charIndex) {
+      const activeRoster = getActiveRoster(state);
+      const ch = activeRoster.characters[charIndex];
+      if (!ch.materials) ch.materials = {};
+      for (const m of state.materials) {
+        if (!ch.materials[m.id]) {
+          ch.materials[m.id] = { required: 0, bound: 0, unbound: 0, other: 0 };
+        }
+      }
+    }
+
+    function renderCharTabs() {
+      const activeRoster = getActiveRoster(state);
+      const tabs = document.getElementById("char-tabs");
+      tabs.innerHTML = "";
+      for (let i = 0; i < activeRoster.rosterSize; i++) {
+        const tab = document.createElement("div");
+        tab.className = "tab" + (i === ui.activeCharIndex ? " active" : "");
+        tab.textContent = (activeRoster.characters[i]?.name) || ("Character " + (i + 1));
+        tab.addEventListener("click", () => {
+          ui.activeCharIndex = i;
+          renderAll();
+        });
+        tabs.appendChild(tab);
+      }
+    }
+
+    function renderCharPanel() {
+      const activeRoster = getActiveRoster(state);
+      ensureCharMaterials(ui.activeCharIndex);
+      const ch = activeRoster.characters[ui.activeCharIndex];
+
+      const compute = computeCarryAndCosts(state);
+      const perChar = compute.perCharacter[ui.activeCharIndex];
+
+      const panel = document.getElementById("char-panel");
+      panel.innerHTML = "";
+
+      if (state.materials.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "note";
+        empty.innerHTML = "No materials yet. Click <span class='kbd'>Add Material</span> to begin.";
+        panel.appendChild(empty);
+        return;
+      }
+
+      // Character name + per-character required gold input
+      const nameGoldRow = document.createElement("div");
+      nameGoldRow.className = "row";
+
+      const nameField = document.createElement("div");
+      nameField.className = "field";
+      nameField.style.minWidth = "220px";
+      const nameLabel = document.createElement("label");
+      nameLabel.textContent = "Character Name";
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.placeholder = `Character ${ui.activeCharIndex + 1}`;
+      nameInput.value = ch.name || `Character ${ui.activeCharIndex + 1}`;
+      nameInput.addEventListener("change", () => {
+        ch.name = nameInput.value.trim() || `Character ${ui.activeCharIndex + 1}`;
+        saveState(state);
+        renderCharTabs();
+        renderGrandTotals(); // refresh filter checkboxes immediately
+      });
+      nameField.appendChild(nameLabel);
+      nameField.appendChild(nameInput);
+
+      // Character Bound Gold
+      const boundGoldField = document.createElement("div");
+      boundGoldField.className = "field";
+      const boundGoldLabel = document.createElement("label");
+      boundGoldLabel.textContent = "Character Bound Gold";
+      const boundGoldInput = document.createElement("input");
+      boundGoldInput.type = "text";
+      boundGoldInput.inputMode = "decimal";
+      boundGoldInput.placeholder = "0.00";
+      boundGoldInput.style.maxWidth = "200px";
+      const getBoundGold = () => Number(ch.boundGold) || 0;
+      boundGoldInput.value = formatFixed2(getBoundGold());
+      boundGoldInput.addEventListener("focus", () => {
+        boundGoldInput.value = String(getBoundGold());
+      });
+      const commitBoundGold = () => {
+        const val = parseNumberString(boundGoldInput.value);
+        ch.boundGold = Math.max(0, val);
+        saveState(state);
+        updateDerived();
+      };
+      boundGoldInput.addEventListener("input", commitBoundGold);
+      boundGoldInput.addEventListener("blur", () => {
+        commitBoundGold();
+        boundGoldInput.value = formatFixed2(getBoundGold());
+      });
+      boundGoldField.appendChild(boundGoldLabel);
+      boundGoldField.appendChild(boundGoldInput);
+
+      const goldField = document.createElement("div");
+      goldField.className = "field";
+      const goldLabel = document.createElement("label");
+      goldLabel.textContent = "Required Gold (This Character)";
+      const goldInput = document.createElement("input");
+      goldInput.type = "text";
+      goldInput.inputMode = "decimal";
+      goldInput.placeholder = "0.00";
+      goldInput.style.maxWidth = "220px";
+      goldInput.value = formatFixed2(ch.requiredGold || 0);
+      goldInput.addEventListener("focus", () => {
+        goldInput.value = String(ch.requiredGold || 0);
+      });
+      const commitCharGold = () => {
+        const val = parseNumberString(goldInput.value);
+        ch.requiredGold = Math.max(0, val);
+        saveState(state);
+        updateDerived();
+      };
+      goldInput.addEventListener("input", commitCharGold);
+      goldInput.addEventListener("blur", () => {
+        commitCharGold();
+        goldInput.value = formatFixed2(ch.requiredGold || 0);
+      });
+      goldField.appendChild(goldLabel);
+      goldField.appendChild(goldInput);
+      nameGoldRow.appendChild(nameField);
+      nameGoldRow.appendChild(boundGoldField);
+      nameGoldRow.appendChild(goldField);
+      panel.appendChild(nameGoldRow);
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Material</th>
+          <th class="right">Required</th>
+          <th class="right">Bound</th>
+          <th class="right">Unbound</th>
+          <th class="right">Other</th>
+          <th class="right">Remaining</th>
+          <th class="right">Value (gold)</th>
+          <th class="right">Carry ➜ (Unbound/Other)</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+
+       for (const m of state.materials) {
+        const pm = perChar.perMaterial[m.id];
+
+        const tr = document.createElement("tr");
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = m.name || "(unnamed)";
+        tr.appendChild(nameTd);
+
+        function numericCell(fieldKey, placeholder) {
+          const td = document.createElement("td");
+          td.className = "right";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.inputMode = "decimal";
+          input.placeholder = placeholder;
+          let initialVal = ch.materials[m.id]?.[fieldKey] ?? 0;
+          if (fieldKey === "other" && ui.activeCharIndex > 0) {
+            const carryUnbound = compute.carryInByChar?.[ui.activeCharIndex]?.[m.id]?.unbound || 0;
+            const carryOther = compute.carryInByChar?.[ui.activeCharIndex]?.[m.id]?.other || 0;
+            const carrySum = carryUnbound + carryOther;
+            initialVal = carrySum;
+          }
+          input.value = formatFixed2(initialVal);
+          input.style.width = "110px";
+          // Disable 'Other' editing for characters after the first
+          if (fieldKey === "other" && ui.activeCharIndex > 0) {
+            input.disabled = true;
+            input.title = "Carried from previous characters";
+          }
+          input.addEventListener("focus", () => {
+            input.value = String(ch.materials[m.id]?.[fieldKey] ?? 0);
+          });
+          const commit = () => {
+            const val = parseNumberString(input.value);
+            ch.materials[m.id][fieldKey] = Math.max(0, val);
+            saveState(state);
+            updateDerived();
+          };
+          input.addEventListener("input", commit);
+          input.addEventListener("blur", () => {
+            commit();
+            input.value = formatFixed2(ch.materials[m.id]?.[fieldKey] ?? 0);
+          });
+          td.appendChild(input);
+          return td;
+        }
+
+        tr.appendChild(numericCell("required", "0"));
+        tr.appendChild(numericCell("bound", "0"));
+        tr.appendChild(numericCell("unbound", "0"));
+        tr.appendChild(numericCell("other", "0"));
+
+        const remainTd = document.createElement("td");
+        remainTd.className = "right remain-cell";
+        remainTd.setAttribute("data-mat-id", m.id);
+        remainTd.innerHTML = pm.remainingUnits > 0
+          ? `<span class="pill red">${formatNumber(pm.remainingUnits)}</span>`
+          : `<span class="pill green">0</span>`;
+        tr.appendChild(remainTd);
+
+        const valueTd = document.createElement("td");
+        valueTd.className = "right value-cell";
+        valueTd.setAttribute("data-mat-id", m.id);
+        valueTd.textContent = formatNumber(pm.marketValue);
+        tr.appendChild(valueTd);
+
+        const carryTd = document.createElement("td");
+        carryTd.className = "right carry-cell";
+        carryTd.setAttribute("data-mat-id", m.id);
+        carryTd.innerHTML = `<span class="pill blue">${formatNumber(pm.leftoverUnbound)} / ${formatNumber(pm.leftoverOther)}</span>`;
+        tr.appendChild(carryTd);
+
+        tbody.appendChild(tr);
+      }
+
+      table.appendChild(tbody);
+      panel.appendChild(table);
+
+      const footer = document.createElement("div");
+      footer.className = "section-footer";
+      const left = document.createElement("div");
+      // Total value = character market value + max(requiredGold - boundGold, 0)
+      const charBound = Number(ch.boundGold) || 0;
+      const charReq = Number(ch.requiredGold) || 0;
+      const charGoldNeed = Math.max(0, charReq - charBound);
+      const charTotalValue = perChar.totals.marketValue + charGoldNeed;
+      left.innerHTML = `<span class="muted">Total Value:</span> <span id="char-total-value" class="pill red">${formatNumber(charTotalValue)} gold</span>` +
+        `<div class="muted" style="margin-top:6px;">Includes Market Value + (Required Gold − Character Bound Gold).</div>`;
+      const right = document.createElement("div");
+      right.innerHTML = `
+        <button class="btn small" id="clear-char">Clear Character</button>
+      `;
+      footer.appendChild(left);
+      footer.appendChild(right);
+      panel.appendChild(footer);
+
+      const clearBtn = footer.querySelector("#clear-char");
+      clearBtn.addEventListener("click", () => {
+        const idx = ui.activeCharIndex;
+        const activeRoster = getActiveRoster(state);
+        for (const m of state.materials) {
+          activeRoster.characters[idx].materials[m.id] = { required: 0, bound: 0, unbound: 0, other: 0 };
+        }
+        saveState(state);
+        renderAll();
+      });
+    }
+
+    function renderGrandTotals() {
+      const summary = document.getElementById("grand-summary");
+      const tableWrap = document.getElementById("grand-table");
+      const filterWrap = document.getElementById("filtered-table");
+      const filterControls = document.getElementById("char-filters");
+      const rawGoldInput = document.getElementById("rawGold");
+      const activeRoster = getActiveRoster(state);
+      // Ensure raw gold input is formatted like other currency fields
+      if (rawGoldInput) {
+        rawGoldInput.type = "text";
+        rawGoldInput.inputMode = "decimal";
+        // Only format if not focused, to avoid caret jump
+        if (document.activeElement !== rawGoldInput) {
+          rawGoldInput.value = formatFixed2(activeRoster.rawGold || 0);
+        }
+      }
+
+      const compute = computeCarryAndCosts(state);
+      const total = compute.grand.totalMarketValue || 0;
+      // Sum per-character required gold minus bound gold (bounded at 0 per character)
+      const charGoldSum = activeRoster.characters.reduce((sum, ch) => {
+        const req = Number(ch.requiredGold) || 0;
+        const bound = Number(ch.boundGold) || 0;
+        return sum + Math.max(0, req - bound);
+      }, 0);
+      // Apply Raw Gold to gold-only need, without affecting material market values
+      const rawGold = Number(activeRoster.rawGold) || 0;
+      const remainingGoldAfterRaw = Math.max(0, charGoldSum - rawGold);
+      const net = Math.max(0, total + remainingGoldAfterRaw);
+
+      // Build per-material totals table under Raw Gold
+      const materialRows = state.materials.map(m => {
+        const req = compute.grand.perMaterialRequiredUnits[m.id] || 0;
+        const remains = compute.grand.perMaterialRemainingUnits[m.id] || 0;
+        const mv = compute.grand.perMaterialMarketValue[m.id] || 0;
+        return `<tr>
+          <td>${m.name || "(unnamed)"}</td>
+          <td class="right">${formatFixed2(req)}</td>
+          <td class="right">${formatFixed2(remains)}</td>
+          <td class="right">${formatFixed2(mv)}</td>
+        </tr>`;
+      }).join("");
+      // Sums for Total row (materials only)
+      const sumMatReq = state.materials.reduce((s, m) => s + (compute.grand.perMaterialRequiredUnits[m.id] || 0), 0);
+      const sumMatRem = state.materials.reduce((s, m) => s + (compute.grand.perMaterialRemainingUnits[m.id] || 0), 0);
+      const sumMatMV  = state.materials.reduce((s, m) => s + (compute.grand.perMaterialMarketValue[m.id] || 0), 0);
+      const goldRequiredTotal = activeRoster.characters.reduce((s, ch) => s + (Number(ch.requiredGold) || 0), 0);
+
+      // Restore concise summary on the right column header (if present)
+      if (summary) {
+        summary.innerHTML = `
+          <div class="row" style="justify-content: space-between;">
+            <div class="muted">Total Market Value Needed</div>
+            <div class="pill red">${formatNumber(total)} gold</div>
+          </div>
+          <div class="row" style="justify-content: space-between; margin-top: 6px;">
+            <div class="muted">Net after Raw Gold</div>
+            <div class="pill ${net === 0 ? "green" : "red"}">${formatNumber(net)} gold</div>
+          </div>
+          <div class="row" style="justify-content: space-between; margin-top: 6px;">
+            <div class="muted">Character Gold Needed (sum of max(Required - Bound, 0))</div>
+            <div>${formatNumber(charGoldSum)} gold</div>
+          </div>
+        `;
+      }
+
+      if (tableWrap) tableWrap.innerHTML = `
+        <div class="hr"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th class="right">Total Required</th>
+              <th class="right">Total Remaining</th>
+              <th class="right">Market Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${materialRows}
+            <tr>
+              <td><strong>Gold</strong></td>
+              <td class="right">${formatFixed2(goldRequiredTotal)}</td>
+              <td class="right">${formatFixed2(remainingGoldAfterRaw)}</td>
+              <td class="right">N/A</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td class="right"></td>
+              <td class="right"></td>
+              <td class="right">${formatFixed2(sumMatMV + goldRequiredTotal)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      // Build filter controls and filtered table on the right
+      if (filterControls && filterWrap) {
+        const rosterKey = String(state.activeRosterIndex);
+        if (!ui.filterSelectedByRoster[rosterKey]) {
+          ui.filterSelectedByRoster[rosterKey] = new Set(Array.from({ length: activeRoster.rosterSize }, (_, i) => i));
+        }
+        filterControls.innerHTML = "";
+        for (let i = 0; i < activeRoster.rosterSize; i++) {
+          const label = document.createElement('label');
+          label.style.display = 'inline-flex';
+          label.style.alignItems = 'center';
+          label.style.gap = '6px';
+          label.style.marginRight = '10px';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = ui.filterSelectedByRoster[rosterKey].has(i);
+          cb.dataset.index = String(i);
+          const span = document.createElement('span');
+          span.textContent = activeRoster.characters[i]?.name || `Character ${i + 1}`;
+          label.appendChild(cb);
+          label.appendChild(span);
+          filterControls.appendChild(label);
+        }
+
+        window.renderFiltered = () => {
+          console.log('renderFiltered called');
+          const checked = new Set(Array.from(filterControls.querySelectorAll('input[type="checkbox"]'))
+            .filter(el => el.checked)
+            .map(el => Number(el.dataset.index)));
+          ui.filterSelectedByRoster[rosterKey] = checked;
+          const filtered = computeCarryAndCosts(state, checked);
+          const rows = state.materials.map(m => {
+            const req = filtered.grand.perMaterialRequiredUnits[m.id] || 0;
+            const rem = filtered.grand.perMaterialRemainingUnits[m.id] || 0;
+            const mv = filtered.grand.perMaterialMarketValue[m.id] || 0;
+            return `<tr>
+              <td>${m.name || "(unnamed)"}</td>
+              <td class="right">${formatFixed2(req)}</td>
+              <td class="right">${formatFixed2(rem)}</td>
+              <td class="right">${formatFixed2(mv)}</td>
+            </tr>`;
+          }).join("");
+          // Gold row based on selected characters' Required Gold and Bound Gold
+          const goldRequired = Array.from(checked).reduce((sum, idx) => sum + (Number(activeRoster.characters[idx]?.requiredGold) || 0), 0);
+          const goldRemaining = Array.from(checked).reduce((sum, idx) => {
+            const req = Number(activeRoster.characters[idx]?.requiredGold) || 0;
+            const bound = Number(activeRoster.characters[idx]?.boundGold) || 0;
+            return sum + Math.max(0, req - bound);
+          }, 0);
+          // Totals for filtered set (materials only)
+          const sumReq = state.materials.reduce((s, m) => s + (filtered.grand.perMaterialRequiredUnits[m.id] || 0), 0);
+          const sumRem = state.materials.reduce((s, m) => s + (filtered.grand.perMaterialRemainingUnits[m.id] || 0), 0);
+          const sumMV  = state.materials.reduce((s, m) => s + (filtered.grand.perMaterialMarketValue[m.id] || 0), 0);
+          // Include gold in Market Value total for right table
+          const totalMVWithGold = sumMV + goldRequired;
+          
+          // Debug logging to understand the calculation
+          console.log('Right table calculation:', {
+            sumMV,
+            goldRequired,
+            totalMVWithGold,
+            checked: Array.from(checked),
+            materials: state.materials.map(m => ({
+              name: m.name,
+              marketValue: filtered.grand.perMaterialMarketValue[m.id] || 0
+            }))
+          });
+          
+          // Update Raw Gold Remaining based on right table's Market Value total
+          const rawGold = Number(activeRoster.rawGold) || 0;
+          const rawGoldRemaining = rawGold - totalMVWithGold; // Allow negative values
+          const rawGoldRemainingInput = document.getElementById("rawGoldRemaining");
+          if (rawGoldRemainingInput) {
+            rawGoldRemainingInput.value = formatFixed2(rawGoldRemaining);
+          }
+          
+          if (filterWrap) {
+            filterWrap.innerHTML = `
+              <div class="hr"></div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Material</th>
+                    <th class="right">Total Required</th>
+                    <th class="right">Total Remaining</th>
+                    <th class="right">Market Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                  <tr>
+                    <td><strong>Gold</strong></td>
+                    <td class="right">${formatFixed2(goldRequired)}</td>
+                    <td class="right">${formatFixed2(goldRemaining)}</td>
+                    <td class="right">N/A</td>
+                  </tr>
+                  <tr class="total-row">
+                    <td><strong>Total</strong></td>
+                    <td class="right"></td>
+                    <td class="right"></td>
+                    <td class="right">${formatFixed2(totalMVWithGold)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            `;
+          }
+
+        };
+
+        filterControls.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener('change', renderFiltered);
+        });
+        renderFiltered();
+      }
+
+      // Raw Gold formatting handlers
+      if (rawGoldInput) {
+        rawGoldInput.onfocus = () => {
+          rawGoldInput.value = String(activeRoster.rawGold || 0);
+        };
+        window.commitRawGold = () => {
+          console.log('commitRawGold called, value:', rawGoldInput.value);
+          activeRoster.rawGold = parseNumberString(rawGoldInput.value);
+          saveState(state);
+          // Update derived totals without touching the input value
+          updateGoldDerived();
+          renderGrandTotals();
+          // Also update the filtered table immediately
+          if (window.renderFiltered) {
+            console.log('Calling renderFiltered from commitRawGold');
+            window.renderFiltered();
+          } else {
+            console.log('renderFiltered not available');
+          }
+        };
+        rawGoldInput.oninput = () => {
+          console.log('rawGoldInput oninput triggered');
+          window.commitRawGold();
+        };
+        rawGoldInput.onblur = () => {
+          console.log('rawGoldInput onblur triggered');
+          window.commitRawGold();
+          rawGoldInput.value = formatFixed2(activeRoster.rawGold || 0);
+        };
+      }
+
+      // After both tables are rendered, align left divider with right divider
+      if (typeof window.syncTotalsDividers === 'function') {
+        // Run on next frame to ensure layout is updated
+        requestAnimationFrame(() => window.syncTotalsDividers());
+      }
+    }
+
+    // Update totals UI without reformatting the Raw Gold input (preserves focus/caret)
+    function updateGoldDerived() {
+      console.log('updateGoldDerived called');
+      const summary = document.getElementById("grand-summary");
+      const tableWrap = document.getElementById("grand-table");
+      const activeRoster = getActiveRoster(state);
+      if (!summary || !tableWrap) return;
+
+      const compute = computeCarryAndCosts(state);
+      const total = compute.grand.totalMarketValue || 0;
+      const charGoldSum = activeRoster.characters.reduce((sum, ch) => {
+        const req = Number(ch.requiredGold) || 0;
+        const bound = Number(ch.boundGold) || 0;
+        return sum + Math.max(0, req - bound);
+      }, 0);
+      const rawGold = Number(activeRoster.rawGold) || 0;
+      const remainingGoldAfterRaw = Math.max(0, charGoldSum - rawGold);
+      const net = Math.max(0, total + remainingGoldAfterRaw);
+      
+      // Calculate totals for left table
+      const sumReq = state.materials.reduce((s, m) => s + (compute.grand.perMaterialRequiredUnits[m.id] || 0), 0);
+      const sumRem = state.materials.reduce((s, m) => s + (compute.grand.perMaterialRemainingUnits[m.id] || 0), 0);
+      const sumMV = state.materials.reduce((s, m) => s + (compute.grand.perMaterialMarketValue[m.id] || 0), 0);
+      // Include gold in Market Value total for left table - use the gold from Total Required column
+      const goldRequired = activeRoster.characters.reduce((sum, ch) => sum + (Number(ch.requiredGold) || 0), 0);
+      const goldRemaining = activeRoster.characters.reduce((sum, ch) => {
+        const req = Number(ch.requiredGold) || 0;
+        const bound = Number(ch.boundGold) || 0;
+        return sum + Math.max(0, req - bound);
+      }, 0);
+      // The total should include the gold from the "Total Required" column's gold row
+      // This is the same as goldRequired since that's what appears in the Total Required column for Gold
+      const totalMVWithGold = sumMV + goldRequired;
+      
+      // Debug logging to understand the calculation
+      console.log('Left table calculation:', {
+        sumMV,
+        goldRequired,
+        totalMVWithGold,
+        materials: state.materials.map(m => ({
+          name: m.name,
+          marketValue: compute.grand.perMaterialMarketValue[m.id] || 0
+        })),
+        rawGold: Number(activeRoster.rawGold) || 0,
+        remainingGoldAfterRaw,
+        charGoldSum,
+        goldRequiredBreakdown: activeRoster.characters.map((ch, idx) => ({
+          char: ch.name || `Character ${idx + 1}`,
+          required: Number(ch.requiredGold) || 0,
+          bound: Number(ch.boundGold) || 0
+        }))
+      });
+
+      const materialRows = state.materials.map(m => {
+        const req = compute.grand.perMaterialRequiredUnits[m.id] || 0;
+        const remains = compute.grand.perMaterialRemainingUnits[m.id] || 0;
+        const mv = compute.grand.perMaterialMarketValue[m.id] || 0;
+        return `<tr>
+          <td>${m.name || "(unnamed)"}</td>
+          <td class="right">${formatFixed2(req)}</td>
+          <td class="right">${formatFixed2(remains)}</td>
+          <td class="right">${formatFixed2(mv)}</td>
+        </tr>`;
+      }).join("");
+
+      summary.innerHTML = `
+        <div class="row" style="justify-content: space-between;">
+          <div class="muted">Total Market Value Needed</div>
+          <div class="pill red">${formatNumber(total)} gold</div>
+        </div>
+        <div class="row" style="justify-content: space-between; margin-top: 6px;">
+          <div class="muted">Net after Raw Gold</div>
+          <div class="pill ${net === 0 ? "green" : "red"}">${formatNumber(net)} gold</div>
+        </div>
+        <div class="row" style="justify-content: space-between; margin-top: 6px;">
+          <div class="muted">Character Gold Needed (sum of max(Required - Bound, 0))</div>
+          <div>${formatNumber(charGoldSum)} gold</div>
+        </div>
+      `;
+
+      console.log('Updating left table with:', {
+        goldRequired: formatFixed2(goldRequired),
+        remainingGoldAfterRaw: formatFixed2(remainingGoldAfterRaw),
+        totalMVWithGold: formatFixed2(totalMVWithGold)
+      });
+      
+      tableWrap.innerHTML = `
+        <div class="hr"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th class="right">Total Required</th>
+              <th class="right">Total Remaining</th>
+              <th class="right">Market Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${materialRows}
+            <tr>
+              <td><strong>Gold</strong></td>
+              <td class="right">${formatFixed2(goldRequired)}</td>
+              <td class="right">${formatFixed2(remainingGoldAfterRaw)}</td>
+              <td class="right">N/A</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td class="right"></td>
+              <td class="right"></td>
+              <td class="right">${formatFixed2(totalMVWithGold)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      // Also update the filtered table when raw gold changes
+      if (window.renderFiltered) {
+        console.log('Calling renderFiltered from updateGoldDerived');
+        window.renderFiltered();
+      } else {
+        console.log('renderFiltered not available in updateGoldDerived');
+      }
+    }
+
+    // Recompute and update only derived UI (no full re-render) to preserve focus
+    function updateDerived() {
+      const compute = computeCarryAndCosts(state);
+      const activeIdx = ui.activeCharIndex;
+      const perChar = compute.perCharacter[activeIdx];
+      const panel = document.getElementById("char-panel");
+      if (panel && perChar) {
+        for (const m of state.materials) {
+          const pm = perChar.perMaterial[m.id];
+          if (!pm) continue;
+          const remainTd = panel.querySelector(`.remain-cell[data-mat-id="${m.id}"]`);
+          if (remainTd) {
+            remainTd.innerHTML = pm.remainingUnits > 0
+              ? `<span class="pill red">${formatNumber(pm.remainingUnits)}</span>`
+              : `<span class="pill green">0</span>`;
+          }
+          const valueTd = panel.querySelector(`.value-cell[data-mat-id="${m.id}"]`);
+          if (valueTd) {
+            valueTd.textContent = formatNumber(pm.marketValue);
+          }
+          const carryTd = panel.querySelector(`.carry-cell[data-mat-id="${m.id}"]`);
+          if (carryTd) {
+            carryTd.innerHTML = `<span class="pill blue">${formatNumber(pm.leftoverUnbound)} / ${formatNumber(pm.leftoverOther)}</span>`;
+          }
+          // If this is not the first character, auto-fill and disable 'Other' input display
+          if (activeIdx > 0) {
+            const row = carryTd?.parentElement;
+            if (row) {
+              const inputCell = row.children[4]; // columns: name, req, bound, unbound, other
+              const input = inputCell?.querySelector('input');
+              if (input) {
+                // show carried total = unbound carry + other carry
+                const carryUnbound = compute.carryInByChar?.[activeIdx]?.[m.id]?.unbound || 0;
+                const carryOther = compute.carryInByChar?.[activeIdx]?.[m.id]?.other || 0;
+                const carrySum = carryUnbound + carryOther;
+                input.value = formatFixed2(carrySum);
+              }
+            }
+          }
+        }
+        const charTotal = document.getElementById("char-total-value");
+        if (charTotal) {
+          charTotal.textContent = `${formatNumber(perChar.totals.marketValue)} gold`;
+        }
+      }
+      // Update grand totals panel without touching other inputs
+      renderGrandTotals();
+    }
+
+    function wireTopButtons() {
+      document.getElementById("add-material").onclick = () => {
+        const id = generateId();
+        state.materials.push({ id, name: "New Material", price: 0 });
+        // Add to each character
+        for (const roster of state.rosters) {
+          for (const ch of roster.characters) {
+          if (!ch.materials) ch.materials = {};
+          ch.materials[id] = { required: 0, bound: 0, unbound: 0, other: 0 };
+        }
+        }
+        saveState(state);
+        renderAll();
+      };
+
+      // Removed Add/Remove Character handlers per request
+
+      // Roster management
+      const addRosterBtn = document.getElementById('add-roster');
+      if (addRosterBtn) {
+        addRosterBtn.onclick = () => {
+          const idx = state.rosters.length;
+          const rosterSize = 6;
+          const newRoster = {
+            name: `Roster ${idx + 1}`,
+            rosterSize,
+            characters: Array.from({ length: rosterSize }, (_, i) => ({ name: `Character ${i + 1}`, materials: {}, requiredGold: 0, boundGold: 0 })),
+            rawGold: 0
+          };
+          // Seed materials keys for each character
+          for (const ch of newRoster.characters) {
+            for (const m of state.materials) {
+              ch.materials[m.id] = { required: 0, bound: 0, unbound: 0, other: 0 };
+            }
+          }
+          state.rosters.push(newRoster);
+          state.activeRosterIndex = idx;
+          ui.activeCharIndex = 0;
+          saveState(state);
+          renderAll();
+        };
+      }
+      const removeRosterBtn = document.getElementById('remove-roster');
+      if (removeRosterBtn) {
+        removeRosterBtn.onclick = () => {
+          if (state.rosters.length <= 1) {
+            alert('Cannot remove the last roster. At least one roster must remain.');
+            return;
+          }
+          const idx = state.activeRosterIndex;
+          state.rosters.splice(idx, 1);
+          // Clamp active index
+          if (state.activeRosterIndex >= state.rosters.length) {
+            state.activeRosterIndex = state.rosters.length - 1;
+          }
+          ui.activeCharIndex = 0;
+          saveState(state);
+          renderAll();
+        };
+      }
+
+      document.getElementById("export-json").onclick = () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "lost-ark-roster.json";
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      };
+
+      const fileInput = document.getElementById("import-file");
+      document.getElementById("import-json").onclick = () => fileInput.click();
+      fileInput.onchange = (ev) => {
+        const file = ev.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const next = JSON.parse(reader.result);
+            // Basic validation
+            if (!Array.isArray(next.materials)) throw new Error("Invalid file");
+            state = loadState(); // start from a clean shape
+            state.materials = next.materials;
+            if (Array.isArray(next.rosters)) {
+              state.rosters = next.rosters;
+              state.activeRosterIndex = Number(next.activeRosterIndex) || 0;
+            } else {
+              // Backwards compatibility: single roster import
+              const rosterSize = Number(next.rosterSize) || 6;
+              const characters = Array.from({ length: rosterSize }, (_, i) => next.characters?.[i] || { materials: {} });
+              state.rosters = [{ name: 'Roster 1', rosterSize, characters, rawGold: Number(next.rawGold) || 0 }];
+              state.activeRosterIndex = 0;
+            }
+            // Ensure per-material presence
+            for (const roster of state.rosters) {
+              for (let i = 0; i < roster.rosterSize; i++) ensureCharMaterials(i);
+            }
+            saveState(state);
+            renderAll();
+          } catch (e) {
+            alert("Import failed. Ensure you selected a valid exported JSON file.");
+          }
+        };
+        reader.readAsText(file);
+        // reset input
+        ev.target.value = "";
+      };
+    }
+
+    function renderAll() {
+      renderPriceTable();
+      renderRosterTabs();
+      renderCharTabs();
+      renderCharPanel();
+      // After building the character panel, ensure carried 'Other' values are reflected immediately
+      updateDerived();
+    }
+
+    function renderRosterTabs() {
+      const wrap = document.getElementById('roster-tabs');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      state.rosters.forEach((r, i) => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (i === state.activeRosterIndex ? ' active' : '');
+        tab.textContent = r.name || `Roster ${i + 1}`;
+        tab.title = 'Switch roster';
+        let clickTimer = null;
+        tab.addEventListener('click', (e) => {
+          // Delay single-click action to allow dblclick to cancel it
+          if (clickTimer) clearTimeout(clickTimer);
+          clickTimer = setTimeout(() => {
+            state.activeRosterIndex = i;
+            if (ui.activeCharIndex >= (state.rosters[i]?.rosterSize || 0)) {
+              ui.activeCharIndex = 0;
+            }
+            saveState(state);
+            renderAll();
+            clickTimer = null;
+          }, 250);
+        });
+        const doRename = () => {
+          const currentName = r.name || `Roster ${i + 1}`;
+          // Replace the tab content with an inline input for smooth renaming
+          tab.classList.add('editing');
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = currentName;
+          input.className = 'rename-input';
+          // Size roughly to text length
+          input.size = Math.max(8, currentName.length);
+          tab.innerHTML = '';
+          tab.appendChild(input);
+          input.focus();
+          input.select();
+          const commit = (val) => {
+            const next = (val || '').trim();
+            tab.classList.remove('editing');
+            if (next && next !== currentName) {
+              r.name = next;
+              saveState(state);
+            }
+            // Re-render tabs to restore normal view
+            renderRosterTabs();
+          };
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') commit(input.value);
+            if (e.key === 'Escape') commit(currentName);
+          });
+          input.addEventListener('blur', () => commit(input.value));
+        };
+        tab.addEventListener('dblclick', (e) => {
+          if (clickTimer) clearTimeout(clickTimer);
+          e.preventDefault();
+          e.stopPropagation();
+          doRename();
+        });
+        tab.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          doRename();
+        });
+        wrap.appendChild(tab);
+      });
+    }
+
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', theme);
+      const cb = document.getElementById('themeCheckbox');
+      if (cb) cb.checked = theme === 'light';
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+
+    function initTheme() {
+      const stored = localStorage.getItem(THEME_STORAGE_KEY);
+      let theme = stored;
+      if (!theme) {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        theme = prefersDark ? 'dark' : 'light';
+      }
+      applyTheme(theme);
+      const cb = document.getElementById('themeCheckbox');
+      if (cb) cb.addEventListener('change', () => applyTheme(cb.checked ? 'light' : 'dark'));
+    }
+
+    // Init
+    initTheme();
+    wireTopButtons();
+    renderAll();
+
+    // Keep the left totals divider aligned with the right when filter chips wrap
+    window.syncTotalsDividers = () => {
+      try {
+        const totalsGrid = document.querySelector('.totals');
+        const grandTable = document.getElementById('grand-table');
+        const leftHrEl = document.querySelector('#grand-table .hr');
+        const rightHrEl = document.querySelector('#filtered-table .hr');
+
+        if (!totalsGrid || !grandTable || !leftHrEl || !rightHrEl) return;
+
+        // Only apply when there are 2 columns
+        const cols = getComputedStyle(totalsGrid).gridTemplateColumns.split(' ').filter(Boolean).length;
+        if (cols < 2) {
+          grandTable.style.marginTop = '0px';
+          return;
+        }
+
+        // Align left hr top to right hr top exactly using geometry
+        const gridRect = totalsGrid.getBoundingClientRect();
+        const grandRect = grandTable.getBoundingClientRect();
+        const leftHrOffsetWithinGrand = leftHrEl.getBoundingClientRect().top - grandRect.top;
+        const rightHrTop = rightHrEl.getBoundingClientRect().top - gridRect.top;
+        const grandTop = grandRect.top - gridRect.top;
+
+        const targetMargin = Math.max(0, (rightHrTop - grandTop - leftHrOffsetWithinGrand));
+        const currentMargin = parseFloat(getComputedStyle(grandTable).marginTop || '0');
+        if (Math.abs(currentMargin - targetMargin) > 0.25) {
+          grandTable.style.marginTop = targetMargin + 'px';
+        }
+      } catch (e) {
+        // no-op
+      }
+    };
+
+    // Re-sync on load and on resize
+    const resync = () => requestAnimationFrame(() => window.syncTotalsDividers());
+    window.addEventListener('load', resync);
+    window.addEventListener('resize', resync);
+    // Observe only additions/removals of filter chips (not checkbox state changes)
+    const filtersNode = document.getElementById('char-filters');
+    if (filtersNode && 'MutationObserver' in window) {
+      const mo = new MutationObserver(() => resync());
+      mo.observe(filtersNode, { childList: true });
+    }
+  </script>
+</body>
+</html>
