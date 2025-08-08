@@ -707,8 +707,11 @@
           const idx = state.materials.findIndex(x => x.id === m.id);
           if (idx >= 0) {
             state.materials.splice(idx, 1);
-            for (const ch of state.characters) {
-              delete ch.materials[m.id];
+            // Remove from all rosters' characters
+            for (const roster of state.rosters) {
+              for (const ch of roster.characters) {
+                if (ch?.materials) delete ch.materials[m.id];
+              }
             }
             saveState(state);
             renderAll();
