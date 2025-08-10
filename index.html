@@ -438,7 +438,7 @@
       </div>
       <div class="hr"></div>
       <div class="note">
-        Data persists to your browser’s localStorage. To move devices/browsers, use Export/Import - made by oblivion...
+        Data persists to your browser’s localStorage. To move devices/browsers, use Export/Import.
       </div>
     </div>
   </div>
@@ -465,7 +465,8 @@
             name: 'Roster 1',
             rosterSize,
             characters: Array.from({ length: rosterSize }, (_, i) => ({ name: `Character ${i + 1}`, materials: {}, requiredGold: 0, boundGold: 0 })),
-            rawGold: 0
+            rawGold: 0,
+            activeCharIndex: 0
           }
         ],
         activeRosterIndex: 0
@@ -515,7 +516,9 @@
               }
             }
           }
-          return { name: r.name || `Roster ${rIdx + 1}`, rosterSize, characters, rawGold: typeof r.rawGold === 'number' ? r.rawGold : 0 };
+          let activeCharIndex = Number(r.activeCharIndex);
+          if (!Number.isInteger(activeCharIndex) || activeCharIndex < 0 || activeCharIndex >= rosterSize) activeCharIndex = 0;
+          return { name: r.name || `Roster ${rIdx + 1}`, rosterSize, characters, rawGold: typeof r.rawGold === 'number' ? r.rawGold : 0, activeCharIndex };
         });
 
         if (!Number.isInteger(parsed.activeRosterIndex) || parsed.activeRosterIndex < 0 || parsed.activeRosterIndex >= parsed.rosters.length) {
@@ -534,7 +537,7 @@
 
     let state = loadState();
     let ui = {
-      activeCharIndex: 0,
+      activeCharIndex: (state.rosters[state.activeRosterIndex]?.activeCharIndex) || 0,
       filterSelectedByRoster: {},
     };
 
@@ -762,6 +765,8 @@
         tab.textContent = (activeRoster.characters[i]?.name) || ("Character " + (i + 1));
         tab.addEventListener("click", () => {
           ui.activeCharIndex = i;
+          activeRoster.activeCharIndex = i;
+          saveState(state);
           renderAll();
         });
         tabs.appendChild(tab);
@@ -1449,7 +1454,8 @@
             name: `Roster ${idx + 1}`,
             rosterSize,
             characters: Array.from({ length: rosterSize }, (_, i) => ({ name: `Character ${i + 1}`, materials: {}, requiredGold: 0, boundGold: 0 })),
-            rawGold: 0
+            rawGold: 0,
+            activeCharIndex: 0
           };
           // Seed materials keys for each character
           for (const ch of newRoster.characters) {
@@ -1477,7 +1483,7 @@
           if (state.activeRosterIndex >= state.rosters.length) {
             state.activeRosterIndex = state.rosters.length - 1;
           }
-          ui.activeCharIndex = 0;
+          ui.activeCharIndex = state.rosters[state.activeRosterIndex]?.activeCharIndex || 0;
           saveState(state);
           renderAll();
         };
